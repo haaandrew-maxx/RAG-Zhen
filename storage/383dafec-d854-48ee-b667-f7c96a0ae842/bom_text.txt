@@ -1,7 +1,0 @@
-| Proveedor | Categoría | Subcategoría | Tipo | Unidad | Calidad del dato de la cantidad | Descripción | Porcentaje material reciclado | Porcentaje material biobasado | Reutilizado in situ | Factor de conversión | Factor de emisión | Unidad de factor de emisión | Calidad del dato del factor de emisión | Fuente del dato |
-|:----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|----------------|
-| Nunsys SA | Materiales y componentes | Eléctrico / eletrónico | Batería de Litio | 8.5 kg | Buena | Módulo batería Li-ion (2ª vida) | 0 | 0 | Sí | 0 | 0 | 1,66 T CO₂ eq | 0 | 0 |
-| Nunsys SA | Materiales y componentes | Metal | Acero Virgen | 3.2 kg | Buena | Carcasa de acero | 0 | 0 | No | 0 | 0 | 0.08 T CO₂ eq | 0 | 0 |
-| Nunsys SA | Materiales y componentes | Eléctrico / eletrónico | Componente electrónico activo | 2.2 kg | Buena | Inversor híbrido 3 kW | 0 | 0 | No | 0 | 0 | 0.01 T CO₂ eq | 0 | 0 |
-| Nunsys SA | Materiales y componentes | Eléctrico / eletrónico | Placa de circuito impreso | 0.35 kg | Buena | BMS (Battery Mgmt System) | 0 | 0 | No | 0 | 0 | 0.01 T CO₂ eq | 0 | 0 |
-| Nunsys SA | Materiales y componentes | Metal | Cobre | 0.8 kg | Buena | Cableado cobre AWG8 (4 uds) | 0 | 0 | No | 0 | 0 | 0.06 T CO₂ eq | 0 | 0 |
