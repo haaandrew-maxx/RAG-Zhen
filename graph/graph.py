@@ -8,7 +8,7 @@ from graph.chains.hallucination_grader import hallucination_grader
 from graph.consts import RETRIEVE, GRADE_DOCUMENTS, GENERATE
 from graph.nodes import generate, grade_documents, retrieve
 from graph.state import GraphState
-
+from graph.logger import log_interaction
 load_dotenv()
 
 
@@ -17,7 +17,7 @@ def grade_generation_grounded_in_documents_and_question(state: GraphState) -> st
     question = state["question"]
     documents = state["documents"]
     generation = state["generation"]
-
+    log_interaction(question, documents, generation)
     score = hallucination_grader.invoke(
         {"documents": documents, "generation": generation}
     )

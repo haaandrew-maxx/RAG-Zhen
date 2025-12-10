@@ -55,7 +55,7 @@ retriever = Chroma(
 ).as_retriever(
     search_type="mmr",
     search_kwargs={
-        "k": 5,          
+        "k": 6,          
         "fetch_k": 20,
         "score_threshold": 0.35,
     },
