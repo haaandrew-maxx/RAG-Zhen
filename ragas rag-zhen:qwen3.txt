@@ -1,0 +1,34 @@
+================================================================================
+RAGAS EVALUATION SUMMARY
+================================================================================
+
+Fecha: 2025-12-14 20:26:49
+Total registros evaluados: 72
+
+--------------------------------------------------------------------------------
+MÉTRICAS RAGAS
+--------------------------------------------------------------------------------
+
+{'faithfulness': 0.6116, 'answer_relevancy': 0.4083}
+
+--------------------------------------------------------------------------------
+EXPLICACIÓN DE MÉTRICAS
+--------------------------------------------------------------------------------
+
+==============================
+RAG Accuracy Evaluation Result
+==============================
+Total questions: 73
+Matched logs:    70
+Missing logs:    3
+
+Final accuracy score: 0.1821
+
+faithfulness (0-1):
+  Mide si la respuesta está apoyada en los contextos recuperados.
+  Valor alto = respuesta fiel a los documentos (sin alucinaciones).
+
+answer_relevancy (0-1):
+  Mide si la respuesta aborda la pregunta correctamente.
+  Valor alto = respuesta relevante y completa.
+        
