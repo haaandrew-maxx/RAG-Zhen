@@ -55,8 +55,8 @@ retriever = Chroma(
 ).as_retriever(
     search_type="mmr",  # Back to MMR for better relevance
     search_kwargs={
-        "k": 6,  # Rolled back from 10 to reduce noise        
-        "fetch_k": 20,
+        "k": 4,  # Rolled back from 10 to reduce noise        
+        "fetch_k": 10,
         "score_threshold": 0.2,
         "lambda_mult": 0.6,  # Higher relevance weight
     },

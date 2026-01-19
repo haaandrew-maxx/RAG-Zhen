@@ -11,8 +11,8 @@ class GradeAnswer(BaseModel):
     )
 
 
-llm = ChatOpenAI(model="deepseek-r1:latest", base_url="https://ollama.gti-ia.upv.es/v1", temperature=0)
-# llm = ChatOpenAI(model="gpt-4.1", base_url="https://api.openai.com/v1", temperature=0)
+# llm = ChatOpenAI(model="deepseek-r1:latest", base_url="https://ollama.gti-ia.upv.es/v1", temperature=0)
+llm = ChatOpenAI(model="gpt-4.1", base_url="https://api.openai.com/v1", temperature=0)
 structured_llm_grader = llm.with_structured_output(GradeAnswer)
 
 system = """You are a grader assessing whether an answer addresses / resolves a question \n 

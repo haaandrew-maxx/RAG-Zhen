@@ -2,8 +2,8 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI
 
-llm = ChatOpenAI(model="deepseek-r1:latest", base_url="https://ollama.gti-ia.upv.es/v1", temperature=0)
-# llm = ChatOpenAI(model="gpt-4.1", base_url="https://api.openai.com/v1", temperature=0)
+# llm = ChatOpenAI(model="deepseek-r1:latest", base_url="https://ollama.gti-ia.upv.es/v1", temperature=0)
+llm = ChatOpenAI(model="gpt-4.1", base_url="https://api.openai.com/v1", temperature=0)
 # ============================================================================
 # MODE A PROMPT: With Project Description + BOM (OPTIMIZED FOR STABILITY)
 # ============================================================================

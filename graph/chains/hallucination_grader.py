@@ -2,8 +2,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 from langchain_core.runnables import RunnableSequence
 from langchain_openai import ChatOpenAI
-llm = ChatOpenAI(model="deepseek-r1:latest", base_url="https://ollama.gti-ia.upv.es/v1", temperature=0)
-# llm = ChatOpenAI(model="gpt-4.1", base_url="https://api.openai.com/v1", temperature=0)
+# llm = ChatOpenAI(model="deepseek-r1:latest", base_url="https://ollama.gti-ia.upv.es/v1", temperature=0)
+llm = ChatOpenAI(model="gpt-4.1", base_url="https://api.openai.com/v1", temperature=0)
 
 class GradeHallucinations(BaseModel):
     """Binary score for hallucination present in generation answer."""

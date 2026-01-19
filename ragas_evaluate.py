@@ -8,12 +8,37 @@ load_dotenv()
 from ragas import evaluate
 from ragas.metrics import faithfulness, answer_relevancy
 from ragas.llms import llm_factory
+from ragas.run_config import RunConfig
 from langchain_openai import OpenAIEmbeddings
-from langchain_openai import OpenAI
-# Initialize embeddings and LLM
-embedding = OpenAIEmbeddings(model="text-embedding-ada-002")  
-client = OpenAI()
-ragas_llm = llm_factory("gpt-4.1", client=client)
+from openai import OpenAI as OpenAIClient
+
+# Initialize embeddings
+embedding = OpenAIEmbeddings(model="text-embedding-ada-002")
+
+# RAGAS judge LLM config (stability + avoid truncation)
+run_config = RunConfig(
+    timeout=300,
+    max_retries=10,
+    max_wait=60,
+    max_workers=4,
+    seed=42,
+)
+
+# IMPORTANT: RAGAS expects an instance of `openai.OpenAI` / `openai.AsyncOpenAI`
+judge_client = OpenAIClient()
+
+# Use a strong judge model with deterministic decoding and a higher output budget
+ragas_llm = llm_factory(
+    "gpt-4.1",
+    client=judge_client,
+    temperature=1e-8,
+    max_tokens=4096,
+    n=1,
+)
+
+# Bind the judge LLM to the metrics so the evaluation is consistent across runs
+faithfulness.llm = ragas_llm
+answer_relevancy.llm = ragas_llm
 
 # Paths
 LOG_PATH = "rag_logs.jsonl"
@@ -23,7 +48,6 @@ EXCEL_PATH = "epd-questions-ground_truths.xlsx"
 
 # Note: RAGAS metrics used:
 # - faithfulness: answer supported by contexts
-# - noise_sensitivity: robustness to irrelevant contexts  
 # - answer_relevancy: answer addresses the question
 
 
@@ -126,6 +150,7 @@ def main():
         dataset=ds,
         metrics=[faithfulness, answer_relevancy],
         embeddings=embedding,
+        run_config=run_config,
     )
 
     print("\nResultados RAGAS:")

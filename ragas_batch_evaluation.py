@@ -16,7 +16,7 @@ from graph.graph import app as graph_app
 EXCEL_PATH = "epd-questions-ground_truths.xlsx"
 
 # Rate limiting configuration
-DELAY_BETWEEN_QUERIES = 2.0  # seconds between each query (adjust based on your rate limit)
+DELAY_BETWEEN_QUERIES = 10.0  # seconds between each query (adjust based on your rate limit)
 MAX_RETRIES = 3  # maximum number of retries for rate limit errors
 RETRY_DELAY = 10.0  # seconds to wait before retrying after rate limit error
 

@@ -2,27 +2,19 @@
 RAGAS EVALUATION SUMMARY
 ================================================================================
 
-Fecha: 2025-12-15 09:46:14
-Total registros evaluados: 70
+Fecha: 2026-01-10 21:47:43
+Total registros evaluados: 12
 
 --------------------------------------------------------------------------------
 MÉTRICAS RAGAS
 --------------------------------------------------------------------------------
 
-{'faithfulness': 0.4750, 'answer_relevancy': 0.3348}
+{'faithfulness': 0.8140, 'answer_relevancy': 0.2320}
 
 --------------------------------------------------------------------------------
 EXPLICACIÓN DE MÉTRICAS
 --------------------------------------------------------------------------------
 
-==============================
-RAG Accuracy Evaluation Result
-==============================
-Total questions: 73
-Matched logs:    68
-Missing logs:    5
-
-Final accuracy score: 0.0625
 
 faithfulness (0-1):
   Mide si la respuesta está apoyada en los contextos recuperados.
