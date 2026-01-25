@@ -1,0 +1,81 @@
+{
+  "resumen_proyecto": {
+    "producto": "Componentes metálicos para la industria naval",
+    "impacto_total_co2": 2040,
+    "principales_hotspots": [
+      "Materiales (Acero virgen)",
+      "Proceso productivo (Soldadura eléctrica y Tratamiento superficial)"
+    ]
+  },
+  "recomendaciones_materiales": [
+    {
+      "prioridad": "alta",
+      "descripcion": "Sustituir el acero virgen por acero reciclado.",
+      "material_actual": "Acero virgen",
+      "material_propuesto": "Acero reciclado",
+      "justificacion_ambiental": "El acero reciclado reduce el impacto de CO2 en un 70% y es ampliamente disponible.",
+      "fuente_conocimiento": "Ecoinvent 3.8",
+      "impacto_esperado": "Reducción significativa de emisiones de CO2",
+      "reduccion_co2_estimada": 1300
+    },
+    {
+      "prioridad": "media",
+      "descripcion": "Sustituir la pintura anticorrosiva por pintura en polvo (electrostática).",
+      "material_actual": "Pintura anticorrosiva",
+      "material_propuesto": "Pintura en polvo (electrostática)",
+      "justificacion_ambiental": "La pintura en polvo reduce las emisiones de CO2 y VOCs en un 40%.",
+      "fuente_conocimiento": "Mejores prácticas industriales",
+      "impacto_esperado": "Reducción moderada de emisiones de CO2",
+      "reduccion_co2_estimada": 18
+    }
+  ],
+  "recomendaciones_procesos": [
+    {
+      "prioridad": "alta",
+      "descripcion": "Implementar soldadura con energía solar fotovoltaica.",
+      "proceso_actual": "Soldadura eléctrica",
+      "proceso_propuesto": "Soldadura con energía solar fotovoltaica",
+      "justificacion_ambiental": "Uso de energía renovable reduce el impacto de CO2 en un 80%.",
+      "fuente_conocimiento": "Base de datos procesos sostenibles",
+      "impacto_esperado": "Reducción significativa de emisiones de CO2",
+      "reduccion_co2_estimada": 48
+    },
+    {
+      "prioridad": "media",
+      "descripcion": "Adoptar pintura en polvo para el tratamiento superficial.",
+      "proceso_actual": "Tratamiento superficial",
+      "proceso_propuesto": "Pintura en polvo (electrostática)",
+      "justificacion_ambiental": "Reducción de CO2 en un 40% y mejora en la eficiencia del material.",
+      "fuente_conocimiento": "Mejores prácticas industriales",
+      "impacto_esperado": "Reducción moderada de emisiones de CO2",
+      "reduccion_co2_estimada": 12.8
+    }
+  ],
+  "recomendaciones_gestion_residuos": [
+    {
+      "prioridad": "alta",
+      "descripcion": "Implementar un sistema de reciclaje para el acero.",
+      "tipo": "reciclaje",
+      "justificacion_ambiental": "El reciclaje de acero reduce significativamente las emisiones de CO2.",
+      "fuente_conocimiento": "RAG documento19.pdf página 274",
+      "impacto_esperado": "Reducción significativa de emisiones de CO2"
+    },
+    {
+      "prioridad": "media",
+      "descripcion": "Valorización energética de residuos de pintura anticorrosiva.",
+      "tipo": "valorizacion",
+      "justificacion_ambiental": "Reducción del impacto ambiental de residuos no reciclables.",
+      "fuente_conocimiento": "RAG documento15.pdf página 21",
+      "impacto_esperado": "Reducción moderada del impacto ambiental"
+    },
+    {
+      "prioridad": "alta",
+      "descripcion": "Diseñar componentes para facilitar su desmontaje y reciclaje.",
+      "tipo": "diseño",
+      "justificacion_ambiental": "Facilita la separación y reciclaje de materiales al final de su vida útil.",
+      "fuente_conocimiento": "Mejores prácticas industriales",
+      "impacto_esperado": "Mejora en la eficiencia del reciclaje"
+    }
+  ],
+  "conclusiones": "El análisis revela que el mayor impacto ambiental proviene del uso de acero virgen y procesos productivos. La implementación de acero reciclado y energía renovable en procesos puede reducir significativamente las emisiones de CO2. Además, mejorar la gestión de residuos y el diseño para el desmontaje puede potenciar la sostenibilidad del proyecto."
+}
