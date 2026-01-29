@@ -1,0 +1,368 @@
+"""
+Generar Informe Node
+Generates a comprehensive markdown report based on all LCA analysis results
+"""
+
+from typing import Any, Dict
+from graph.state import GraphState
+import json
+
+
+def generar_informe(state: GraphState) -> Dict[str, Any]:
+    """
+    Generates a comprehensive markdown report in English based on all analysis results.
+    
+    This node:
+    1. Collects all analysis results from the state
+    2. Formats them into a structured markdown report
+    3. Returns the markdown report as the generation output
+    
+    Args:
+        state: Current graph state containing all analysis results
+        
+    Returns:
+        Updated state with markdown report in the generation field
+    """
+    print("---GENERATING COMPREHENSIVE MARKDOWN REPORT---")
+    
+    question = state["question"]
+    documents = state["documents"]
+    description = state.get("description", "")
+    bom = state.get("bom", "")
+    
+    # Collect all analysis results
+    resumen_proyecto = state.get("resumen_proyecto", {})
+    analisis_materiales = state.get("analisis_materiales", [])
+    analisis_procesos = state.get("analisis_procesos", [])
+    analisis_residuos = state.get("analisis_residuos", {})
+    recomendaciones_finales = state.get("recomendaciones_finales", {})
+    
+    print(f"   - Resumen proyecto: {'Yes' if resumen_proyecto else 'No'}")
+    print(f"   - Analisis materiales: {len(analisis_materiales) if analisis_materiales else 0} items")
+    print(f"   - Analisis procesos: {len(analisis_procesos) if analisis_procesos else 0} items")
+    print(f"   - Analisis residuos: {'Yes' if analisis_residuos else 'No'}")
+    print(f"   - Recomendaciones finales: {'Yes' if recomendaciones_finales else 'No'}")
+    print(f"   - Description: {len(description)} chars")
+    print(f"   - BOM: {len(bom)} chars")
+    print(f"   - Documents: {len(documents)} docs")
+    
+    # Debug: Print actual data structures
+    print(f"   [DEBUG] resumen_proyecto keys: {list(resumen_proyecto.keys()) if isinstance(resumen_proyecto, dict) else 'not a dict'}")
+    if analisis_materiales:
+        print(f"   [DEBUG] analisis_materiales[0] keys: {list(analisis_materiales[0].keys()) if isinstance(analisis_materiales[0], dict) else 'not a dict'}")
+    if analisis_procesos:
+        print(f"   [DEBUG] analisis_procesos[0] keys: {list(analisis_procesos[0].keys()) if isinstance(analisis_procesos[0], dict) else 'not a dict'}")
+    print(f"   [DEBUG] analisis_residuos keys: {list(analisis_residuos.keys()) if isinstance(analisis_residuos, dict) else 'not a dict'}")
+    print(f"   [DEBUG] recomendaciones_finales keys: {list(recomendaciones_finales.keys()) if isinstance(recomendaciones_finales, dict) else 'not a dict'}")
+    
+    # Build markdown report
+    markdown_lines = []
+    
+    # Title
+    markdown_lines.append("# Life Cycle Assessment (LCA) Comprehensive Report")
+    markdown_lines.append("")
+    markdown_lines.append(f"**Question:** {question}")
+    markdown_lines.append("")
+    markdown_lines.append("---")
+    markdown_lines.append("")
+    
+    # Section 1: Project Analysis
+    if resumen_proyecto:
+        markdown_lines.append("## 1. Project Analysis")
+        markdown_lines.append("")
+        
+        if isinstance(resumen_proyecto, dict):
+            # Product/System
+            if "producto_sistema" in resumen_proyecto:
+                markdown_lines.append("### Product/System")
+                markdown_lines.append(f"{resumen_proyecto['producto_sistema']}")
+                markdown_lines.append("")
+            
+            # Environmental Impact
+            if "impacto_ambiental_total" in resumen_proyecto:
+                impact = resumen_proyecto["impacto_ambiental_total"]
+                markdown_lines.append("### Total Environmental Impact")
+                if isinstance(impact, dict):
+                    for key, value in impact.items():
+                        markdown_lines.append(f"- **{key.replace('_', ' ').title()}:** {value}")
+                else:
+                    markdown_lines.append(f"{impact}")
+                markdown_lines.append("")
+            
+            # Impact Distribution
+            if "distribucion_impacto" in resumen_proyecto:
+                distrib = resumen_proyecto["distribucion_impacto"]
+                markdown_lines.append("### Impact Distribution by Phase")
+                if isinstance(distrib, dict):
+                    for phase, value in distrib.items():
+                        markdown_lines.append(f"- **{phase}:** {value}")
+                markdown_lines.append("")
+            
+            # Relevant Materials
+            if "materiales_relevantes" in resumen_proyecto:
+                materiales = resumen_proyecto["materiales_relevantes"]
+                markdown_lines.append("### Key Materials")
+                if isinstance(materiales, list):
+                    for mat in materiales:
+                        if isinstance(mat, dict):
+                            markdown_lines.append(f"- **{mat.get('material', 'N/A')}**: {mat.get('impacto', 'N/A')}")
+                        else:
+                            markdown_lines.append(f"- {mat}")
+                markdown_lines.append("")
+            
+            # Relevant Processes
+            if "procesos_relevantes" in resumen_proyecto:
+                procesos = resumen_proyecto["procesos_relevantes"]
+                markdown_lines.append("### Key Processes")
+                if isinstance(procesos, list):
+                    for proc in procesos:
+                        if isinstance(proc, dict):
+                            markdown_lines.append(f"- **{proc.get('proceso', 'N/A')}**: {proc.get('impacto', 'N/A')}")
+                        else:
+                            markdown_lines.append(f"- {proc}")
+                markdown_lines.append("")
+        
+        markdown_lines.append("---")
+        markdown_lines.append("")
+    
+    # Section 2: Materials Analysis
+    if analisis_materiales:
+        markdown_lines.append("## 2. Materials Analysis")
+        markdown_lines.append("")
+        
+        if isinstance(analisis_materiales, list):
+            for idx, material in enumerate(analisis_materiales, 1):
+                if isinstance(material, dict):
+                    mat_name = material.get('material_actual', 'Unknown')
+                    markdown_lines.append(f"### Material {idx}: {mat_name}")
+                    markdown_lines.append("")
+                    
+                    # Current Impact
+                    impact_co2 = material.get('impacto_actual_co2', 'N/A')
+                    markdown_lines.append(f"**Current CO2 Impact:** {impact_co2}")
+                    markdown_lines.append("")
+                    
+                    # Alternatives
+                    if "alternativas" in material and material["alternativas"]:
+                        markdown_lines.append("**Sustainable Alternatives:**")
+                        alternatives = material["alternativas"]
+                        if isinstance(alternatives, list):
+                            for alt in alternatives:
+                                if isinstance(alt, dict):
+                                    alt_name = alt.get('material_alternativo', alt.get('alternativa', 'N/A'))
+                                    benefit = alt.get('beneficio_ambiental', alt.get('justificacion', 'N/A'))
+                                    reduction = alt.get('reduccion_co2', 'N/A')
+                                    markdown_lines.append(f"- **{alt_name}**")
+                                    markdown_lines.append(f"  - Benefit: {benefit}")
+                                    if reduction != 'N/A':
+                                        markdown_lines.append(f"  - CO2 Reduction: {reduction}")
+                                else:
+                                    markdown_lines.append(f"- {alt}")
+                        markdown_lines.append("")
+                    
+                    # No alternatives found
+                    if material.get('sin_alternativa', False):
+                        markdown_lines.append("*No sustainable alternatives identified in current knowledge base*")
+                        markdown_lines.append("")
+                
+                markdown_lines.append("")
+        
+        markdown_lines.append("---")
+        markdown_lines.append("")
+    
+    # Section 3: Process Analysis
+    if analisis_procesos:
+        markdown_lines.append("## 3. Process Analysis")
+        markdown_lines.append("")
+        
+        if isinstance(analisis_procesos, list):
+            for idx, proceso in enumerate(analisis_procesos, 1):
+                if isinstance(proceso, dict):
+                    proc_name = proceso.get('proceso_actual', 'Unknown')
+                    markdown_lines.append(f"### Process {idx}: {proc_name}")
+                    markdown_lines.append("")
+                    
+                    # Current metrics
+                    energia = proceso.get('consumo_energia_actual', 'N/A')
+                    tipo_energia = proceso.get('tipo_energia_actual', 'N/A')
+                    co2 = proceso.get('impacto_co2_actual', 'N/A')
+                    
+                    markdown_lines.append(f"**Current Energy Consumption:** {energia}")
+                    markdown_lines.append(f"**Energy Type:** {tipo_energia}")
+                    markdown_lines.append(f"**Current CO2 Impact:** {co2}")
+                    markdown_lines.append("")
+                    
+                    # Alternatives/Improvements
+                    if "alternativas" in proceso and proceso["alternativas"]:
+                        markdown_lines.append("**Improvement Opportunities:**")
+                        alternatives = proceso["alternativas"]
+                        if isinstance(alternatives, list):
+                            for alt in alternatives:
+                                if isinstance(alt, dict):
+                                    alt_name = alt.get('alternativa', 'N/A')
+                                    benefit = alt.get('beneficio_ambiental', 'N/A')
+                                    reduction = alt.get('reduccion_co2', 'N/A')
+                                    markdown_lines.append(f"- **{alt_name}**")
+                                    markdown_lines.append(f"  - Benefit: {benefit}")
+                                    if reduction != 'N/A':
+                                        markdown_lines.append(f"  - CO2 Reduction: {reduction}")
+                                else:
+                                    markdown_lines.append(f"- {alt}")
+                        markdown_lines.append("")
+                    
+                    # No alternatives found
+                    if proceso.get('sin_alternativa', False):
+                        markdown_lines.append("*No process improvements identified in current knowledge base*")
+                        markdown_lines.append("")
+                
+                markdown_lines.append("")
+        
+        markdown_lines.append("---")
+        markdown_lines.append("")
+    
+    # Section 4: Waste Management Analysis
+    if analisis_residuos:
+        markdown_lines.append("## 4. Waste Management Analysis")
+        markdown_lines.append("")
+        
+        if isinstance(analisis_residuos, dict):
+                    reuse = current.get('reutilizacion', False)
+                    recycle = current.get('reciclaje', False)
+                    valorizacion = current.get('valorizacion', False)
+                    markdown_lines.append(f"- **Reuse:** {'Yes' if reuse else 'No'}")
+                    markdown_lines.append(f"- **Recycling:** {'Yes' if recycle else 'No'}")
+                    markdown_lines.append(f"- **Recovery/Valorization:** {'Yes' if valorizacion else 'No'}")
+                    if 'descripcion' in current:
+                        markdown_lines.append(f"\n{current['descripcion']}")
+                markdown_lines.append("")
+            
+            # Proposed improvements
+            if "mejoras_propuestas" in analisis_residuos:
+                mejoras = analisis_residuos["mejoras_propuestas"]
+                markdown_lines.append("### Proposed Improvements")
+                if isinstance(mejoras, list):
+                    for mejora in mejoras:
+                        if isinstance(mejora, dict):
+                            accion = mejora.get('accion', 'N/A')
+                            impacto = mejora.get('impacto_esperado', 'N/A')
+                            markdown_lines.append(f"- **{accion}**")
+                            markdown_lines.append(f"  - Expected Impact: {impacto}")
+                        else:
+                            markdown_lines.append(f"- {mejora}")
+                markdown_lines.append("")
+            
+            # Design for disassembly
+            if "diseño_desmontaje" in analisis_residuos:
+                diseno = analisis_residuos["diseño_desmontaje"]
+                markdown_lines.append("### Design for Disassembly")
+                if isinstance(diseno, dict):
+                    factible = diseno.get('factible', False)
+                    markdown_lines.append(f"**Feasible:** {'Yes' if factible else 'No'}")
+                    if 'mejoras' in diseno:
+                        markdown_lines.append(f"\n**Improvements:** {diseno['mejoras']}")
+                else:
+                    markdown_lines.append(f"{diseno}")
+                
+            if "recycling_potential" in analisis_residuos:
+            # Materials recommendations
+            if "recomendaciones_materiales" in recomendaciones_finales:
+                rec_mat = recomendaciones_finales["recomendaciones_materiales"]
+                markdown_lines.append("### Material Recommendations")
+                if isinstance(rec_mat, list):
+                    for rec in rec_mat:
+                        if isinstance(rec, dict):
+                            prioridad = rec.get('prioridad', 'media').upper()
+                            desc = rec.get('descripcion', 'N/A')
+                            impacto = rec.get('impacto_esperado', 'N/A')
+                            markdown_lines.append(f"- **[{prioridad}]** {desc}")
+                            markdown_lines.append(f"  - Expected Impact: {impacto}")
+                        else:
+                            markdown_lines.append(f"- {rec}")
+                markdown_lines.append("")
+            
+            # Process recommendations
+            if "recomendaciones_procesos" in recomendaciones_finales:
+                rec_proc = recomendaciones_finales["recomendaciones_procesos"]
+                markdown_lines.append("### Process Recommendations")
+                if isinstance(rec_proc, list):
+                    for rec in rec_proc:
+                        if isinstance(rec, dict):
+                            prioridad = rec.get('prioridad', 'media').upper()
+                            desc = rec.get('descripcion', 'N/A')
+                            impacto = rec.get('impacto_esperado', 'N/A')
+                            markdown_lines.append(f"- **[{prioridad}]** {desc}")
+                            markdown_lines.append(f"  - Expected Impact: {impacto}")
+                        else:
+                            markdown_lines.append(f"- {rec}")
+                markdown_lines.append("")
+            
+            # Waste management recommendations
+            if "recomendaciones_gestion_residuos" in recomendaciones_finales:
+                rec_res = recomendaciones_finales["recomendaciones_gestion_residuos"]
+                markdown_lines.append("### Waste Management Recommendations")
+                if isinstance(rec_res, list):
+                    for rec in rec_res:
+                        if isinstance(rec, dict):
+                            prioridad = rec.get('prioridad', 'media').upper()
+                            desc = rec.get('descripcion', 'N/A')
+                            impacto = rec.get('impacto_esperado', 'N/A')
+                            markdown_lines.append(f"- **[{prioridad}]** {desc}")
+                            markdown_lines.append(f"  - Expected Impact: {impacto}")
+                        else:
+                            markdown_lines.append(f"- {rec}")
+                markdown_lines.append("")
+            
+            # Conclusions
+            if "conclusiones" in recomendaciones_finales:
+                markdown_lines.append("### Conclusions")
+                markdown_lines.append(f"{recomendaciones_finales['conclusiones']}")
+                            if isinstance(action, dict):
+                            markdown_lines.append(f"- **{action.get('action', 'N/A')}** (Priority: {action.get('priority', 'N/A')})")
+                            if "expected_impact" in action:
+                                markdown_lines.append(f"  - Expected Impact: {action['expected_impact']}")
+                        else:
+                            markdown_lines.append(f"- {action}")
+                else:
+                    markdown_lines.append(f"{actions}")
+                markdown_lines.append("")
+            
+            if "long_term_goals" in recomendaciones_finales:
+                markdown_lines.append("### Long-term Goals")
+                goals = recomendaciones_finales["long_term_goals"]
+                if isinstance(goals, list):
+                    for goal in goals:
+                        markdown_lines.append(f"- {goal}")
+                else:
+                    markdown_lines.append(f"{goals}")
+                markdown_lines.append("")
+            
+            if "implementation_timeline" in recomendaciones_finales:
+                markdown_lines.append("### Implementation Timeline")
+                markdown_lines.append(f"{recomendaciones_finales['implementation_timeline']}")
+                markdown_lines.append("")
+        else:
+            markdown_lines.append(f"{json.dumps(recomendaciones_finales, indent=2, ensure_ascii=False)}")
+            markdown_lines.append("")
+        
+        markdown_lines.append("---")
+        markdown_lines.append("")
+    
+    # Conclusion
+    markdown_lines.append("## Conclusion")
+    markdown_lines.append("")
+    markdown_lines.append("This comprehensive Life Cycle Assessment report provides a detailed analysis of the project's environmental impact across all phases, from materials selection to waste management. The recommendations outlined above prioritize sustainable practices and offer actionable steps to reduce the environmental footprint of the project.")
+    markdown_lines.append("")
+    markdown_lines.append("---")
+    markdown_lines.append("")
+    markdown_lines.append(f"*Report generated based on {len(documents)} source documents*")
+    
+    # Join all lines into final markdown report
+    markdown_report = "\n".join(markdown_lines)
+    
+    print(f"---REPORT GENERATED ({len(markdown_lines)} lines)---")
+    
+    return {
+        "generation": markdown_report,
+        "question": question,
+        "documents": documents,
+    }

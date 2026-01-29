@@ -250,6 +250,50 @@ async def on_message(message: cl.Message):
     generation_str = final_state.get("generation", "")
     docs: List[Document] = final_state.get("documents", [])
 
+    # Debug: Check generation string
+    print(f"---DEBUG: generation_str length: {len(generation_str)} chars")
+    print(f"---DEBUG: generation_str starts with: {generation_str[:100] if generation_str else 'EMPTY'}")
+
+    # Check if this is a markdown report (from generar_informe node)
+    if generation_str and generation_str.strip().startswith("# Informe Completo de Análisis de Ciclo de Vida"):
+        print("---DEBUG: Markdown report detected, converting to JSON for display")
+        
+        # Save markdown report to file
+        import datetime
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        report_file = f"lca_report_{timestamp}.md"
+        with open(report_file, "w", encoding="utf-8") as f:
+            f.write(generation_str)
+        print(f"---DEBUG: Markdown report saved to {report_file}")
+        
+        # Convert to JSON structure for Chainlit display
+        # Extract state data for structured display
+        resumen_proyecto = final_state.get("resumen_proyecto", {})
+        analisis_materiales = final_state.get("analisis_materiales", [])
+        analisis_procesos = final_state.get("analisis_procesos", [])
+        analisis_residuos = final_state.get("analisis_residuos", {})
+        recomendaciones_finales = final_state.get("recomendaciones_finales", {})
+        
+        # Convert markdown report to JSON format that app.py expects
+        json_output = {
+            "report_type": "lca_comprehensive",
+            "markdown_file": report_file,
+            "markdown_content": generation_str,
+            "resumen_proyecto": resumen_proyecto,
+            "recomendaciones_materiales": recomendaciones_finales.get("recomendaciones_materiales", []),
+            "recomendaciones_procesos": recomendaciones_finales.get("recomendaciones_procesos", []),
+            "recomendaciones_gestion_residuos": recomendaciones_finales.get("recomendaciones_gestion_residuos", []),
+            "conclusiones": recomendaciones_finales.get("conclusiones", ""),
+            "analisis_materiales_detallado": analisis_materiales,
+            "analisis_procesos_detallado": analisis_procesos,
+            "analisis_residuos_detallado": analisis_residuos,
+        }
+        
+        # Replace generation_str with JSON for standard processing
+        generation_str = json.dumps(json_output, ensure_ascii=False, indent=2)
+        print(f"---DEBUG: Converted to JSON format for display")
+        # Continue to standard JSON processing below
+
     # Try parsing JSON
     try:
         data = json.loads(generation_str)
@@ -262,6 +306,7 @@ async def on_message(message: cl.Message):
 
     # Check if this is LCA mode output or regular RAG mode output
     is_lca_mode = "recomendaciones_materiales" in data or "recomendaciones_procesos" in data
+    is_comprehensive_report = data.get("report_type") == "lca_comprehensive"
     
     if is_lca_mode:
         # New LCA Analysis output structure
@@ -270,6 +315,14 @@ async def on_message(message: cl.Message):
         recomendaciones_procesos = data.get("recomendaciones_procesos", [])
         recomendaciones_residuos = data.get("recomendaciones_gestion_residuos", [])
         conclusiones = data.get("conclusiones", "")
+        
+        # For comprehensive reports, also get detailed analysis
+        if is_comprehensive_report:
+            markdown_content = data.get("markdown_content", "")
+            markdown_file = data.get("markdown_file", "")
+            analisis_materiales_detallado = data.get("analisis_materiales_detallado", [])
+            analisis_procesos_detallado = data.get("analisis_procesos_detallado", [])
+            analisis_residuos_detallado = data.get("analisis_residuos_detallado", {})
     else:
         # Legacy RAG mode output structure
         answer = data.get("answer", "")
@@ -300,18 +353,55 @@ async def on_message(message: cl.Message):
 
     # ========== LCA MODE OUTPUT ==========
     if is_lca_mode:
+        # For comprehensive reports, show markdown download link first
+        if is_comprehensive_report and markdown_file:
+            await cl.Message(
+                content=f"📄 **Comprehensive LCA Report Generated!**\n\n"
+                        f"Full markdown report saved to: `{markdown_file}`\n\n"
+                        f"Detailed analysis sections below:"
+            ).send()
+        
         # Resumen del proyecto
         if resumen_proyecto:
-            producto = resumen_proyecto.get("producto", "")
-            impacto_total = resumen_proyecto.get("impacto_total_co2", "N/A")
-            hotspots = resumen_proyecto.get("principales_hotspots", [])
+            producto = resumen_proyecto.get("producto_sistema", resumen_proyecto.get("producto", ""))
             
             resumen_text = []
             if producto:
                 resumen_text.append(f"**Producto/Sistema:** {producto}")
-            resumen_text.append(f"**Impacto Total CO₂:** {impacto_total}")
+            
+            # Get impact data
+            impacto = resumen_proyecto.get("impacto_ambiental_total", {})
+            if isinstance(impacto, dict):
+                co2 = impacto.get("co2_eq", "N/A")
+                unidad = impacto.get("unidad", "")
+                resumen_text.append(f"**Impacto Total:** {co2} {unidad}")
+            else:
+                impacto_total = resumen_proyecto.get("impacto_total_co2", "N/A")
+                resumen_text.append(f"**Impacto Total CO₂:** {impacto_total}")
+            
+            # Impact distribution
+            distrib = resumen_proyecto.get("distribucion_impacto", {})
+            if distrib:
+                resumen_text.append("\n**Distribución de Impacto:**")
+                for fase, datos in distrib.items():
+                    if isinstance(datos, dict):
+                        pct = datos.get("porcentaje", "N/A")
+                        co2_val = datos.get("co2_eq", "N/A")
+                        resumen_text.append(f"  • {fase.replace('_', ' ').title()}: {pct}% ({co2_val} kg CO₂)")
+            
+            # Key materials
+            materiales = resumen_proyecto.get("materiales_relevantes", [])
+            if materiales:
+                resumen_text.append("\n**Materiales Clave:**")
+                for mat in materiales[:5]:
+                    if isinstance(mat, dict):
+                        nombre = mat.get("material", "N/A")
+                        impacto_mat = mat.get("impacto_co2", mat.get("impacto", "N/A"))
+                        resumen_text.append(f"  • {nombre}: {impacto_mat} kg CO₂")
+            
+            hotspots = resumen_proyecto.get("principales_hotspots", [])
             if hotspots:
-                resumen_text.append(f"**Principales Hotspots:**\n" + "\n".join(f"  • {h}" for h in hotspots))
+                resumen_text.append(f"\n**Principales Hotspots:**\n" + "\n".join(f"  • {h}" for h in hotspots))
             
             await cl.Message(
                 content="📊 **Resumen del Proyecto**",

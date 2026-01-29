@@ -49,3 +49,8 @@ class GraphState(TypedDict):
     analisis_procesos: Optional[List[Dict[str, Any]]]  # Step 3 output
     analisis_residuos: Optional[Dict[str, Any]]  # Step 4 output
     recomendaciones_finales: Optional[Dict[str, Any]]  # Step 5 output
+    
+    # Agentic routing control
+    next_node: Optional[str]  # Next node to execute (decided by agent router)
+    pending_nodes: Optional[List[str]]  # Queue of nodes to execute after current
+    routing_reasoning: Optional[str]  # Agent's reasoning for routing decision

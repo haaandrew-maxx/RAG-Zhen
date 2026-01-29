@@ -102,37 +102,74 @@ Eres un asistente experto en Análisis de Ciclo de Vida (ACV), sostenibilidad in
 RESUMEN DEL PROYECTO:
 {resumen_proyecto}
 
-DATASET DE MATERIALES ALTERNATIVOS (Excel/Ecoinvent):
+DATOS DE MATERIALES DISPONIBLES:
 {dataset_materiales}
 
-DOCUMENTOS RECUPERADOS POR RAG:
+DOCUMENTACIÓN ADICIONAL:
 {rag_documents}
 
-INSTRUCCIONES:
+INSTRUCCIONES CRÍTICAS:
 Para cada material principal del proyecto:
-1. Identifica alternativas más sostenibles en el dataset o documentación RAG
-2. Evalúa:
-   - Posibilidad de uso de material reciclado o reutilizado
-   - Reducción potencial de emisiones de CO2
-   - Alineación con economía circular
-3. Si NO hay alternativa viable, justifica por qué
-4. NO inventes alternativas que no estén en los datos
+
+1. **BÚSQUEDA ACTIVA DE ALTERNATIVAS:**
+   - NO te limites a buscar coincidencias exactas de nombres
+   - ANALIZA la función del material en el proyecto (conductor eléctrico, estructura, aislamiento, etc.)
+   - BUSCA materiales con función similar, incluso si tienen nombres diferentes
+   - Ejemplos:
+     * Si el material es COBRE (conductor eléctrico) → considera ALUMINIO como alternativa funcional
+     * Si el material es ACERO (estructura) → considera acero reciclado o aluminio según cargas
+     * Si el material es PLÁSTICO VIRGEN → busca plásticos reciclados o bioplásticos
+
+2. **ANÁLISIS DE VIABILIDAD:**
+   - Evalúa si la alternativa puede cumplir la misma función técnica
+   - Compara propiedades físicas relevantes (conductividad, resistencia, peso, etc.)
+   - Considera trade-offs (ej: aluminio conduce menos que cobre pero es más ligero)
+   - Califica viabilidad: alta (fácil sustitución), media (requiere ajustes), baja (limitaciones técnicas)
+
+3. **EVALUACIÓN AMBIENTAL CORRECTA:**
+   - **CRÍTICO:** Compara factores de emisión POR KILOGRAMO (T CO2/kg), NO emisiones totales
+   - Busca en los datos el "Factor de Emisión" de cada material
+   - Ejemplo correcto:
+     * Material actual: Cobre virgen = 0.004 T CO2/kg
+     * Material alternativo: Aluminio = 0.012 T CO2/kg  
+     * Conclusión: Aluminio tiene MAYOR emisión por kg (no es mejor ambientalmente por este criterio)
+   - Para la misma cantidad de material, calcula: reduccion_co2_kg = (factor_actual - factor_alternativo) × cantidad_kg
+   - Si factor_alternativo > factor_actual → reducción es NEGATIVA (peor opción ambiental)
+   - Considera material reciclado vs virgen (reciclado suele tener menor factor)
+   - Evalúa circularidad (reutilizable, reciclable, biodegradable)
+
+4. **VIABILIDAD INTEGRAL:**
+   - Viabilidad "alta" solo si: reduce emisiones Y es técnicamente viable
+   - Viabilidad "media" si: ligero aumento de emisiones PERO otras ventajas (peso, circularidad, costo)
+   - Viabilidad "baja" si: aumenta significativamente emisiones sin ventajas compensatorias
+   - Incluye en "consideraciones_tecnicas" el trade-off de emisiones vs otras propiedades
+
+5. **SOLO si NO existe ninguna alternativa funcional:**
+   - Marca "sin_alternativa": true
+   - Explica por qué (ej: "No hay materiales alternativos con propiedades conductivas comparables en los datos disponibles")
+
+**IMPORTANTE:** Sé proactivo pero PRECISO con las emisiones - usa factores por kg, no totales.
 
 Genera un JSON con la siguiente estructura:
 {{
     "analisis_materiales": [
         {{
             "material_actual": "nombre del material",
-            "impacto_actual_co2": valor,
+            "funcion_material": "describe la función (conductor, estructura, aislamiento, etc.)",
+            "impacto_actual_co2": valor_total_kg_co2,
+            "factor_emision_actual": "valor T CO2/kg del material actual",
+            "cantidad_kg": valor,
             "alternativas": [
                 {{
                     "material_alternativo": "nombre",
-                    "fuente": "Excel/RAG/documento específico",
+                    "factor_emision_alternativo": "valor T CO2/kg del material alternativo",
                     "material_reciclado": true/false,
-                    "reduccion_co2_estimada": valor,
-                    "porcentaje_reduccion": valor,
+                    "reduccion_co2_por_kg": "valor en kg CO2 por cada kg de material (negativo si aumenta)",
+                    "reduccion_co2_estimada": "valor total para la cantidad usada (puede ser negativo)",
+                    "porcentaje_reduccion": "porcentaje (negativo si aumenta emisiones)",
                     "viabilidad": "alta/media/baja",
-                    "justificacion": "explicación técnica",
+                    "justificacion": "explicación técnica de por qué puede sustituir al material actual",
+                    "consideraciones_tecnicas": "trade-offs: emisiones, peso, propiedades, costo, etc.",
                     "economia_circular": {{
                         "reutilizable": true/false,
                         "reciclable": true/false,
@@ -140,9 +177,7 @@ Genera un JSON con la siguiente estructura:
                     }}
                 }}
             ],
-            "sin_alternativa": {{
-                "razon": "justificación si no hay alternativa viable"
-            }}
+            "sin_alternativa": false
         }}
     ]
 }}
