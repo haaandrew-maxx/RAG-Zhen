@@ -35,3 +35,15 @@ Missing logs:       1
 Correct answers:    73
 Total evaluated:    196
 Accuracy rate:      37.24% (0.3724)
+
+
+==============================
+RAG Accuracy Evaluation Result
+==============================
+Total questions:    123
+Matched logs:       123
+Missing logs:       0
+
+Correct answers:    50
+Total evaluated:    123
+Accuracy rate:      40.65% (0.4065)
