@@ -98,114 +98,18 @@ async def on_chat_start():
         content=(
             "👋 Bienvenido/a al asistente RAG basado en LangGraph.\n\n"
             "**🔵 Modo A** (Análisis de Proyecto):\n"
-            "Sube **descripción del proyecto** (PDF) + **BOM** (.xlsx/.csv) para análisis específico.\n\n"
+            "Adjunta **descripción del proyecto** (PDF) + **BOM** (.xlsx/.csv) en tu primer mensaje.\n\n"
             "**🟠 Modo B** (Consulta General):\n"
-            "No subas archivos y haz preguntas directas sobre sostenibilidad y medio ambiente.\n\n"
+            "Escribe directamente tu pregunta sin adjuntar ficheros.\n\n"
             "Los ficheros cargados solo afectarán a esta conversación."
         )
     ).send()
 
-    files_msg = await cl.AskFileMessage(
-        content=(
-            "📎 **Opcional:** Sube ficheros solo si quieres análisis de proyecto específico.\n\n"
-            "**Formatos aceptados:**\n"
-            "- Descripción: PDF o texto\n"
-            "- BOM: Excel (.xlsx) o CSV (.csv)\n\n"
-            "**Máximo 2 ficheros.**\n\n"
-            "⚠️ **Importante:** Para análisis de proyecto (Modo A), necesitas subir AMBOS ficheros "
-            "(descripción + BOM).\n\n"
-            "✅ Pulsa **Continuar** sin subir nada para consultas generales (Modo B)."
-        ),
-        accept=[
-            "application/pdf",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "text/csv",
-            "application/csv",
-            "application/vnd.ms-excel",
-            ".csv"
-        ],
-        max_size_mb=20,
-        max_files=2,
-        timeout=600,
-    ).send()
-
-    session_docs: List[Document] = []
-    bom_text: str = ""
-    description_text: str = ""
-    has_bom = False
-    has_description = False
-
-    if files_msg and isinstance(files_msg, list):
-        for f in files_msg:
-            path = f.path
-            ext = os.path.splitext(path)[1].lower()
-
-            # BOM formats
-            if ext in [".xlsx", ".xls", ".csv"]:
-                bom_docs, bom_text = load_bom_table_as_documents_and_text(path)
-                session_docs.extend(bom_docs)
-                has_bom = True
-
-            # Description or others
-            else:
-                desc_docs = load_uploaded_file(path)
-                session_docs.extend(desc_docs)
-                has_description = True
-
-                if not description_text:
-                    description_text = (
-                        f"Documentación del proyecto desde: {os.path.basename(path)}"
-                    )
-
-    # Determine mode and validate
-    if has_description and has_bom:
-        # Mode A: Both files present
-        mode = "A"
-        cl.user_session.set("mode", mode)
-        await cl.Message(
-            content=(
-                f"✅ **Modo A activado** 🔵\n\n"
-                f"Se han cargado {len(session_docs)} fragmentos de documentación.\n\n"
-                "Las respuestas analizarán tu proyecto específico (descripción + BOM) "
-                "combinado con la base de conocimiento de sostenibilidad."
-            )
-        ).send()
-    elif has_description or has_bom:
-        # Partial upload - warn user
-        mode = "B"
-        cl.user_session.set("mode", mode)
-        await cl.Message(
-            content=(
-                "⚠️ **Advertencia:** Solo subiste uno de los dos ficheros necesarios.\n\n"
-                "Para análisis de proyecto (Modo A) necesitas:\n"
-                "- ✅ Descripción del proyecto (PDF)\n"
-                "- ✅ BOM (Excel/CSV)\n\n"
-                "**Continuando en Modo B** 🟠 (solo base de conocimiento).\n"
-                "Los ficheros subidos serán ignorados."
-            )
-        ).send()
-        # Clear partial data
-        session_docs = []
-        bom_text = ""
-        description_text = ""
-    else:
-        # Mode B: No files uploaded
-        mode = "B"
-        cl.user_session.set("mode", mode)
-        await cl.Message(
-            content=(
-                "✅ **Modo B activado** 🟠\n\n"
-                "No se han subido ficheros.\n\n"
-                "Las respuestas se basarán en la base de conocimiento de "
-                "sostenibilidad y medio ambiente (60 documentos).\n\n"
-                "Haz preguntas generales sobre medio ambiente, economía circular, "
-                "normativas, etc."
-            )
-        ).send()
-
-    cl.user_session.set("session_docs", session_docs)
-    cl.user_session.set("bom_text", bom_text)
-    cl.user_session.set("description_text", description_text)
+    # Initialize session state
+    cl.user_session.set("mode", None)
+    cl.user_session.set("session_docs", [])
+    cl.user_session.set("bom_text", "")
+    cl.user_session.set("description_text", "")
 
 
 # --------------------------
@@ -219,7 +123,67 @@ async def on_message(message: cl.Message):
     session_docs: List[Document] = cl.user_session.get("session_docs") or []
     bom_text: str = cl.user_session.get("bom_text") or ""
     description_text: str = cl.user_session.get("description_text") or ""
-    mode: str = cl.user_session.get("mode") or "B"
+    mode: Optional[str] = cl.user_session.get("mode")
+
+    # ── Process any attached files (mode not yet set, or user sends new files) ──
+    if message.elements:
+        new_session_docs: List[Document] = []
+        new_bom_text = ""
+        new_description_text = ""
+        has_bom = False
+        has_description = False
+
+        for el in message.elements:
+            # Chainlit File elements have a .path attribute
+            path = getattr(el, "path", None)
+            if not path:
+                continue
+            ext = os.path.splitext(path)[1].lower()
+            if ext in [".xlsx", ".xls", ".csv"]:
+                bom_docs, new_bom_text = load_bom_table_as_documents_and_text(path)
+                new_session_docs.extend(bom_docs)
+                has_bom = True
+            else:
+                desc_docs = load_uploaded_file(path)
+                new_session_docs.extend(desc_docs)
+                has_description = True
+                if not new_description_text:
+                    new_description_text = f"Documentación del proyecto desde: {os.path.basename(path)}"
+
+        if has_description and has_bom:
+            mode = "A"
+            session_docs = new_session_docs
+            bom_text = new_bom_text
+            description_text = new_description_text
+            await cl.Message(
+                content=(
+                    f"✅ **Modo A activado** 🔵\n"
+                    f"Cargados {len(session_docs)} fragmentos (descripción + BOM)."
+                )
+            ).send()
+        elif has_description or has_bom:
+            mode = "B"
+            await cl.Message(
+                content=(
+                    "⚠️ Solo se adjuntó uno de los dos ficheros necesarios para Modo A.\n"
+                    "**Continuando en Modo B** 🟠 (solo base de conocimiento)."
+                )
+            ).send()
+        else:
+            mode = mode or "B"
+
+        cl.user_session.set("session_docs", session_docs)
+        cl.user_session.set("bom_text", bom_text)
+        cl.user_session.set("description_text", description_text)
+
+    # ── First message with no files → Mode B ──────────────────────────────────
+    if mode is None:
+        mode = "B"
+        await cl.Message(
+            content="✅ **Modo B activado** 🟠 \u2014 Consulta general sobre la base de conocimiento."
+        ).send()
+
+    cl.user_session.set("mode", mode)
 
     # Display current mode
     mode_emoji = "🔵" if mode == "A" else "🟠"

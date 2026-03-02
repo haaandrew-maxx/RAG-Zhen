@@ -37,7 +37,7 @@ with open(LOGS_FILE, "r", encoding="utf-8") as f:
 
 # Setup LLM
 client = AsyncOpenAI()
-llm = llm_factory("gpt-4o-mini", client=client)
+llm = llm_factory("gpt-4.1", client=client)
 
 # Create metric
 scorer = AnswerAccuracy(llm=llm)

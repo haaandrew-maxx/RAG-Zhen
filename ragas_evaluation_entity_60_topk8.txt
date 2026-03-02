@@ -2,14 +2,13 @@
 RAGAS EVALUATION SUMMARY
 ================================================================================
 
-
 Total registros evaluados: 208
 
 --------------------------------------------------------------------------------
 MÉTRICAS RAGAS
 --------------------------------------------------------------------------------
 
-{'faithfulness': 0.9018, 'answer_relevancy': 0.4672}
+{'faithfulness': 0.8800, 'answer_relevancy': 0.4559}
 
 --------------------------------------------------------------------------------
 EXPLICACIÓN DE MÉTRICAS
@@ -25,6 +24,7 @@ answer_relevancy (0-1):
   Valor alto = respuesta relevante y completa.
 
 
+
 ==============================
 RAG Accuracy Evaluation Result
 ==============================
@@ -32,6 +32,54 @@ Total questions:    197
 Matched logs:       196
 Missing logs:       1
 
-Correct answers:    73
+Correct answers:    80
 Total evaluated:    196
-Accuracy rate:      37.24% (0.3724)
+Accuracy rate:      40.82% (0.4082)     
+
+
+
+
+
+
+7
+
+==============================
+RAG Accuracy Evaluation Result
+==============================
+Total questions:    197
+Matched logs:       196
+Missing logs:       1
+
+Correct answers:    75
+Total evaluated:    196
+Accuracy rate:      38.27% (0.3827)
+
+
+9
+
+==============================
+RAG Accuracy Evaluation Result
+==============================
+Total questions:    197
+Matched logs:       196
+Missing logs:       1
+
+Correct answers:    79
+Total evaluated:    196
+Accuracy rate:      40.31% (0.4031)
+
+10
+
+==============================
+RAG Accuracy Evaluation Result
+==============================
+Total questions:    197
+Matched logs:       196
+Missing logs:       1
+
+Correct answers:    78
+Total evaluated:    196
+Accuracy rate:      39.80% (0.3980)
+
+
+
