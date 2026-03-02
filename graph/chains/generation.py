@@ -71,11 +71,6 @@ REGLAS IMPORTANTES:
 CONTEXTO DISPONIBLE:
 {context}
 ────────────────────────────────────────
-⚠ El CONTEXTO puede incluir tablas en formato Markdown.  
-Léelas con atención: las tablas pueden contener datos clave (parámetros, n.º de referencia, 
-procedimientos paso a paso, listas de piezas, rangos de valores, etc.).  
-Interpreta los datos de las tablas igual que cualquier otro texto del CONTEXTO.
-────────────────────────────────────────
 PREGUNTA:
 {question}
 ────────────────────────────────────────
@@ -124,9 +119,6 @@ Devuelve SIEMPRE un JSON válido con exactamente estos dos campos:
 
 CONTEXTO:
 {context}
-
-⚠ Si el CONTEXTO contiene tablas en formato Markdown, léelas e interpreta sus datos
-(parámetros, referencias, procedimientos, etc.) para responder con precisión.
 
 PREGUNTA:
 {question}

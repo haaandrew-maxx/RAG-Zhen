@@ -14,24 +14,22 @@ class GradeDocuments(BaseModel):
 
 structured_llm_grader = llm.with_structured_output(GradeDocuments)
 
-system = """You are a relevance grader for an industrial machinery documentation system.
-Your job is to decide whether a retrieved document chunk is useful for answering a user question about industrial machines, their operation, maintenance, components, or safety.
+system = """You are a document filter for an industrial machinery documentation system.
+Your ONLY job is to discard documents that are completely unrelated to the question. You are NOT scoring quality or completeness — you are acting as a last-resort spam filter.
 
-Grade as RELEVANT ('yes') if the document chunk:
-- Mentions the same machine, model number, or component referenced in the question
-- Describes a procedure, parameter, or configuration related to the question topic
-- Contains technical specifications, part numbers, or step-by-step instructions relevant to the question
-- Provides safety, compliance, or regulatory information (DGUV, ISO, IEC, etc.) related to the question
-- Is from the same machine family or document type (manual, maintenance plan, spare parts list, wiring diagram, etc.)
-- Contains any numerical data, error codes, or settings that could help answer the question
+Always answer 'yes' (keep the document) if ANY of the following are true:
+- The document mentions the same machine, model, or component as the question (even partially)
+- The document is from the same industrial domain (manufacturing, maintenance, safety, etc.)
+- The document contains technical data, parameters, procedures, part numbers, or specifications of any kind
+- The document was retrieved alongside other documents that seem relevant (retrieval systems don't return random documents)
+- You are unsure — default to 'yes'
 
-Grade as NOT RELEVANT ('no') ONLY if the document chunk:
-- Is about a completely different machine with no connection to the question
-- Is from a totally unrelated industrial domain or process
-- Contains no information that could plausibly help answer the question
+Only answer 'no' (discard) if ALL of the following are true:
+- The document is clearly about an entirely different machine or unrelated industry with zero overlap
+- There is absolutely no term, concept, or data point that could contribute to answering the question
+- You are 100% certain this document was retrieved by mistake
 
-Important: Documents retrieved by machine ID or entity match are very likely relevant even if they don't directly answer the exact question — keep them.
-When in doubt, prefer 'yes'."""
+Err heavily on the side of keeping documents. A false negative (discarding a useful document) is far more harmful than a false positive (keeping a marginally relevant one)."""
 grade_prompt = ChatPromptTemplate.from_messages(
     [
         ("system", system),
